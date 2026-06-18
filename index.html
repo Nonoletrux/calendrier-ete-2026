@@ -62,7 +62,7 @@
         }
         .timeline-hour-row {
             display: flex; height: 60px; border-bottom: 1px solid #f0f4f8; position: relative;
-            box-sizing: border-box; /* 👈 Cette ligne magique intègre la bordure dans les 60px */
+            box-sizing: border-box;
         }
         .hour-label { width: 50px; font-size: 0.8rem; color: #718096; padding-top: 5px; }
         
@@ -152,7 +152,6 @@
                         <option value="Papa">Papa</option>
                         <option value="Invité">Invité</option>
                     </select>
-                </div>
                 </div>
                 <div class="form-group">
                     <label>Heure Début</label>
@@ -246,7 +245,7 @@
             if (!timeline) return;
             timeline.innerHTML = "";
 
-            // Affiche désormais de 00:00 à 23:00 (24 heures complètes)
+            // Affiche de 00:00 à 23:00 (24 heures complètes)
             for(let h=0; h<=23; h++) {
                 const hourStr = h < 10 ? '0'+h : h;
                 timeline.innerHTML += `
@@ -263,7 +262,7 @@
                     
                     // 🎨 SYSTÈME DE COULEURS EN FONCTION DU PRÉNOM
                     const name = act.owner.toLowerCase().trim();
-                    let blockColor = "#63b3ed"; // Couleur bleue par défaut
+                    let blockColor = "#63b3ed"; 
                     let borderColor = "#2b6cb0";
 
                     if (name === "noham") {
@@ -283,18 +282,6 @@
                         borderColor = "#dd6b20";
                     }
 
-                    if (name === "noham") {
-                        blockColor = "#4cbd94"; // Vert pour Noham
-                        borderColor = "#2a9d8f";
-                    } else if (name === "Alexandra" || name === "Julien" || name === "Noham" || name === "Calie") { // Remplace par son vrai prénom si tu veux !
-                        blockColor = "#e91e63"; // Rose/Rouge pour Maman
-                        borderColor = "#ad1457";
-                    } else {
-                        // Si c'est quelqu'un d'autre (un invité), on met une couleur orange
-                        blockColor = "#f6ad55"; 
-                        borderColor = "#dd6b20";
-                    }
-
                     const startArr = act.start.split(':');
                     const endArr = act.end.split(':');
                     const startMin = parseInt(startArr[0]) * 60 + parseInt(startArr[1]);
@@ -307,7 +294,7 @@
                     const topOffset = startMin;
                     const duration = endMin - startMin;
 
-                    // On applique les couleurs dynamiques ici :
+                    // Application des styles et couleurs
                     block.style.top = `${topOffset}px`;
                     block.style.height = `${duration}px`;
                     block.style.backgroundColor = blockColor;
@@ -325,9 +312,6 @@
                     timeline.appendChild(block);
                 });
             }
-                    timeline.appendChild(block);
-                });
-            }
         }
 
         window.openModal = (id = null, data = null) => {
@@ -340,7 +324,7 @@
                 document.getElementById('modalTitle').innerText = "Modifier l'activité";
                 document.getElementById('editId').value = id;
                 document.getElementById('title').value = data.title;
-                document.getElementById('owner').value = data.owner; // Il va automatiquement sélectionner le bon prénom dans la liste !
+                document.getElementById('owner').value = data.owner;
                 document.getElementById('start').value = data.start;
                 document.getElementById('end').value = data.end;
                 document.getElementById('deleteBtn').style.display = 'block';
@@ -353,7 +337,7 @@
 
         window.closeModal = () => document.getElementById('modal').style.display = 'none';
 
-        // --- TRAITEMENT DU FORMULAIRE (LOCAL OU CLOUD) ---
+        // --- TRAITEMENT DU FORMULAIRE ---
         document.getElementById('activityForm').onsubmit = (e) => {
             e.preventDefault();
             const id = document.getElementById('editId').value;
