@@ -62,6 +62,7 @@
         }
         .timeline-hour-row {
             display: flex; height: 60px; border-bottom: 1px solid #f0f4f8; position: relative;
+            box-sizing: border-box;
         }
         .hour-label { width: 50px; font-size: 0.8rem; color: #718096; padding-top: 5px; }
         
@@ -237,7 +238,8 @@
             if (!timeline) return;
             timeline.innerHTML = "";
 
-            for(let h=7; h<=23; h++) {
+            // Affiche désormais de 00:00 à 23:00 (24 heures complètes)
+            for(let h=0; h<=23; h++) {
                 const hourStr = h < 10 ? '0'+h : h;
                 timeline.innerHTML += `
                     <div class="timeline-hour-row">
@@ -254,9 +256,14 @@
                     const startArr = act.start.split(':');
                     const endArr = act.end.split(':');
                     const startMin = parseInt(startArr[0]) * 60 + parseInt(startArr[1]);
-                    const endMin = parseInt(endArr[0]) * 60 + parseInt(endArr[1]);
+                    let endMin = parseInt(endArr[0]) * 60 + parseInt(endArr[1]);
                     
-                    const topOffset = (startMin - (7 * 60));
+                    // Gestion du passage après minuit
+                    if (endMin < startMin) {
+                        endMin += 1440; 
+                    }
+                    
+                    const topOffset = startMin;
                     const duration = endMin - startMin;
 
                     block.style.top = `${topOffset}px`;
