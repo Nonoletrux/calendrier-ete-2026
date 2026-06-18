@@ -253,12 +253,28 @@
                     const block = document.createElement('div');
                     block.className = "event-block";
                     
+                    // 🎨 SYSTÈME DE COULEURS EN FONCTION DU PRÉNOM
+                    const name = act.owner.toLowerCase().trim();
+                    let blockColor = "#63b3ed"; // Couleur bleue par défaut
+                    let borderColor = "#2b6cb0";
+
+                    if (name === "noham") {
+                        blockColor = "#4cbd94"; // Vert pour Noham
+                        borderColor = "#2a9d8f";
+                    } else if (name === "maman" || name === "valérie") { // Remplace par son vrai prénom si tu veux !
+                        blockColor = "#e91e63"; // Rose/Rouge pour Maman
+                        borderColor = "#ad1457";
+                    } else {
+                        // Si c'est quelqu'un d'autre (un invité), on met une couleur orange
+                        blockColor = "#f6ad55"; 
+                        borderColor = "#dd6b20";
+                    }
+
                     const startArr = act.start.split(':');
                     const endArr = act.end.split(':');
                     const startMin = parseInt(startArr[0]) * 60 + parseInt(startArr[1]);
                     let endMin = parseInt(endArr[0]) * 60 + parseInt(endArr[1]);
                     
-                    // Gestion du passage après minuit
                     if (endMin < startMin) {
                         endMin += 1440; 
                     }
@@ -266,8 +282,12 @@
                     const topOffset = startMin;
                     const duration = endMin - startMin;
 
+                    // On applique les couleurs dynamiques ici :
                     block.style.top = `${topOffset}px`;
                     block.style.height = `${duration}px`;
+                    block.style.backgroundColor = blockColor;
+                    block.style.borderLeftColor = borderColor;
+
                     block.innerHTML = `
                         <div class="event-time">${act.start} - ${act.end}</div>
                         <strong>${act.title}</strong>
@@ -277,6 +297,9 @@
                         e.stopPropagation();
                         openModal(id, act);
                     };
+                    timeline.appendChild(block);
+                });
+            }
                     timeline.appendChild(block);
                 });
             }
