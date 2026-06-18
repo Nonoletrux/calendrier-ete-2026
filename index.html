@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vacances d'Été 2026 ☀️</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --accent: #2a9d8f;
+            --bg: #f4f7f9;
+            --white: #ffffff;
+            --text: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            margin: 0; padding: 0; color: var(--text);
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #4a90e2, #63b3ed);
+            color: white; text-align: center; padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .view-container { max-width: 900px; margin: 1rem auto; padding: 0 10px; }
+
+        /* --- VUE CALENDRIER --- */
+        #calendarView { display: block; }
+        .month-nav {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--white); padding: 15px; border-radius: 15px; margin-bottom: 15px;
+        }
+        .days-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
+            background: var(--white); padding: 15px; border-radius: 15px;
+        }
+        .day-cell {
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+            min-height: 80px; padding: 5px; cursor: pointer; transition: 0.2s;
+        }
+        .day-cell:hover { background: #eef6ff; border-color: var(--primary); }
+        .day-num { font-weight: bold; margin-bottom: 5px; }
+        .day-dots { display: flex; flex-wrap: wrap; gap: 2px; }
+        .dot { width: 6px; height: 6px; background: var(--primary); border-radius: 50%; }
+
+        /* --- VUE JOUR (EDT) --- */
+        #dayView { display: none; }
+        .day-header {
+            display: flex; align-items: center; gap: 15px;
+            background: var(--white); padding: 15px; border-radius: 15px; margin-bottom: 10px;
+        }
+        .back-btn { background: #edf2f7; border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; }
+        
+        .timeline-container {
+            position: relative; background: var(--white); border-radius: 15px;
+            padding: 10px; overflow-y: auto; height: 65vh; border: 1px solid #e2e8f0;
+        }
+        .timeline-hour-row {
+            display: flex; height: 60px; border-bottom: 1px solid #f0f4f8; position: relative;
+        }
+        .hour-label { width: 50px; font-size: 0.8rem; color: #718096; padding-top: 5px; }
+        
+        .event-block {
+            position: absolute; left: 60px; right: 10px;
+            background: #63b3ed; color: white; border-radius: 6px;
+            padding: 5px 10px; font-size: 0.85rem; cursor: pointer;
+            border-left: 4px solid #2b6cb0; z-index: 2;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .event-block .event-time { font-weight: bold; font-size: 0.75rem; opacity: 0.9; }
+        .event-block .event-owner { font-style: italic; font-size: 0.75rem; display: block; margin-top: 2px;}
+
+        .fab {
+            position: fixed; bottom: 30px; right: 30px;
+            background: var(--accent); color: white; width: 60px; height: 60px;
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-size: 24px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 5;
+        }
+
+        /* --- MODAL --- */
+        .modal {
+            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 100;
+        }
+        .modal-content {
+            background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px;
+        }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .btn-save { background: var(--primary); color: white; }
+        .btn-delete { background: #fc8181; color: white; }
+        .btn-cancel { background: #e2e8f0; }
+
+        .fade-in { animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🏝️ Vacances 2026</h1>
+        <p id="currentViewTitle">Juillet 2026</p>
+    </header>
+
+    <div class="view-container">
+        <div id="calendarView" class="fade-in">
+            <div class="month-nav">
+                <button class="back-btn" onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                <h2 id="monthLabel">Juillet 2026</h2>
+                <button class="back-btn" onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="days-grid" id="daysContainer"></div>
+        </div>
+
+        <div id="dayView" class="fade-in">
+            <div class="day-header">
+                <button class="back-btn" onclick="showCalendar()"><i class="fas fa-arrow-left"></i> Retour</button>
+                <h2 id="selectedDayLabel">Mercredi 15 Juillet</h2>
+            </div>
+            <div class="timeline-container" id="timeline"></div>
+        </div>
+    </div>
+
+    <div class="fab" onclick="openModal()"><i class="fas fa-plus"></i></div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Nouvelle Activité</h3>
+            <form id="activityForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>Quoi ?</label>
+                    <input type="text" id="title" placeholder="Ex: Restaurant, Plage..." required>
+                </div>
+                <div class="form-group">
+                    <label>Qui ? (Prénom)</label>
+                    <input type="text" id="owner" placeholder="Ton prénom" required>
+                </div>
+                <div class="form-group">
+                    <label>Heure Début</label>
+                    <input type="time" id="start" required>
+                </div>
+                <div class="form-group">
+                    <label>Heure Fin</label>
+                    <input type="time" id="end" required>
+                </div>
+                <div class="modal-btns">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">Annuler</button>
+                    <button type="button" id="deleteBtn" class="btn btn-delete" style="display:none;" onclick="deleteActivity()">Supprimer</button>
+                    <button type="submit" class="btn btn-save">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+        // CONFIGURATION FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJedfHVZifSWyVlsIJUC_xsgIA08hKdxY",
+            authDomain: "calendrier-ete-2026.firebaseapp.com",
+            databaseURL: "https://calendrier-ete-2026-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "calendrier-ete-2026",
+            storageBucket: "calendrier-ete-2026.firebasestorage.app",
+            messagingSenderId: "1085195720250",
+            appId: "1:1085195720250:web:33a031dc1094db0b070703"
+        };
+
+        let currentMonth = 7;
+        let selectedDateKey = "";
+        let allActivities = JSON.parse(localStorage.getItem('localVacationData')) || {};
+        let isFirebaseConnected = false;
+        let db = null;
+
+        const monthsInfo = {
+            7: { name: "Juillet", days: 31, offset: 2 },
+            8: { name: "Août", days: 31, offset: 5 }
+        };
+
+        // RENDU CALENDRIER
+        window.renderCalendar = function() {
+            const container = document.getElementById('daysContainer');
+            if (!container) return;
+            const info = monthsInfo[currentMonth];
+            document.getElementById('monthLabel').innerText = `${info.name} 2026`;
+            container.innerHTML = "";
+
+            for(let i=0; i<info.offset; i++) container.innerHTML += `<div></div>`;
+
+            for(let d=1; d<=info.days; d++) {
+                const key = `2026-${currentMonth}-${d}`;
+                const hasActivities = allActivities[key] ? Object.keys(allActivities[key]).length : 0;
+                let dots = "";
+                for(let j=0; j<Math.min(hasActivities, 3); j++) dots += `<div class="dot"></div>`;
+
+                const cell = document.createElement('div');
+                cell.className = "day-cell";
+                cell.innerHTML = `<div class="day-num">${d}</div><div class="day-dots">${dots}</div>`;
+                cell.onclick = () => showDay(key, d, info.name);
+                container.appendChild(cell);
+            }
+        }
+
+        window.changeMonth = (dir) => {
+            currentMonth = (currentMonth === 7 && dir === 1) ? 8 : (currentMonth === 8 && dir === -1) ? 7 : currentMonth;
+            renderCalendar();
+        };
+
+        window.showDay = (key, day, monthName) => {
+            selectedDateKey = key;
+            document.getElementById('calendarView').style.display = 'none';
+            document.getElementById('dayView').style.display = 'block';
+            document.getElementById('selectedDayLabel').innerText = `${day} ${monthName} 2026`;
+            renderTimeline(key);
+        };
+
+        window.showCalendar = () => {
+            selectedDateKey = "";
+            document.getElementById('calendarView').style.display = 'block';
+            document.getElementById('dayView').style.display = 'none';
+            renderCalendar();
+        };
+
+        function renderTimeline(key) {
+            const timeline = document.getElementById('timeline');
+            if (!timeline) return;
+            timeline.innerHTML = "";
+
+            for(let h=7; h<=23; h++) {
+                const hourStr = h < 10 ? '0'+h : h;
+                timeline.innerHTML += `
+                    <div class="timeline-hour-row">
+                        <div class="hour-label">${hourStr}:00</div>
+                    </div>
+                `;
+            }
+
+            if(allActivities[key]) {
+                Object.entries(allActivities[key]).forEach(([id, act]) => {
+                    const block = document.createElement('div');
+                    block.className = "event-block";
+                    
+                    const startArr = act.start.split(':');
+                    const endArr = act.end.split(':');
+                    const startMin = parseInt(startArr[0]) * 60 + parseInt(startArr[1]);
+                    const endMin = parseInt(endArr[0]) * 60 + parseInt(endArr[1]);
+                    
+                    const topOffset = (startMin - (7 * 60));
+                    const duration = endMin - startMin;
+
+                    block.style.top = `${topOffset}px`;
+                    block.style.height = `${duration}px`;
+                    block.innerHTML = `
+                        <div class="event-time">${act.start} - ${act.end}</div>
+                        <strong>${act.title}</strong>
+                        <span class="event-owner"><i class="fas fa-user"></i> ${act.owner}</span>
+                    `;
+                    block.onclick = (e) => {
+                        e.stopPropagation();
+                        openModal(id, act);
+                    };
+                    timeline.appendChild(block);
+                });
+            }
+        }
+
+        window.openModal = (id = null, data = null) => {
+            if(!selectedDateKey) { alert("Choisis un jour d'abord !"); return; }
+            document.getElementById('modal').style.display = 'flex';
+            const form = document.getElementById('activityForm');
+            form.reset();
+            
+            if(id) {
+                document.getElementById('modalTitle').innerText = "Modifier l'activité";
+                document.getElementById('editId').value = id;
+                document.getElementById('title').value = data.title;
+                document.getElementById('owner').value = data.owner;
+                document.getElementById('start').value = data.start;
+                document.getElementById('end').value = data.end;
+                document.getElementById('deleteBtn').style.display = 'block';
+            } else {
+                document.getElementById('modalTitle').innerText = "Nouvelle Activité";
+                document.getElementById('editId').value = "";
+                document.getElementById('deleteBtn').style.display = 'none';
+            }
+        };
+
+        window.closeModal = () => document.getElementById('modal').style.display = 'none';
+
+        // --- TRAITEMENT DU FORMULAIRE (LOCAL OU CLOUD) ---
+        document.getElementById('activityForm').onsubmit = (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const actData = {
+                title: document.getElementById('title').value,
+                owner: document.getElementById('owner').value,
+                start: document.getElementById('start').value,
+                end: document.getElementById('end').value
+            };
+
+            if (isFirebaseConnected) {
+                if(id) {
+                    update(ref(db, `vacations/${selectedDateKey}/${id}`), actData);
+                } else {
+                    push(ref(db, `vacations/${selectedDateKey}`), actData);
+                }
+            } else {
+                if (!allActivities[selectedDateKey]) allActivities[selectedDateKey] = {};
+                const finalId = id ? id : 'local_' + Date.now();
+                allActivities[selectedDateKey][finalId] = actData;
+                localStorage.setItem('localVacationData', JSON.stringify(allActivities));
+                renderTimeline(selectedDateKey);
+            }
+            closeModal();
+        };
+
+        window.deleteActivity = () => {
+            const id = document.getElementById('editId').value;
+            if(confirm("Supprimer cette activité ?")) {
+                if (isFirebaseConnected) {
+                    remove(ref(db, `vacations/${selectedDateKey}/${id}`));
+                } else {
+                    if (allActivities[selectedDateKey] && allActivities[selectedDateKey][id]) {
+                        delete allActivities[selectedDateKey][id];
+                        localStorage.setItem('localVacationData', JSON.stringify(allActivities));
+                        renderTimeline(selectedDateKey);
+                    }
+                }
+                closeModal();
+            }
+        };
+
+        // --- ESSAI DE CONNEXION FIREBASE ---
+        try {
+            if (firebaseConfig.apiKey !== "TON_API_KEY" && firebaseConfig.apiKey !== "") {
+                const app = initializeApp(firebaseConfig);
+                db = getDatabase(app);
+                isFirebaseConnected = true;
+
+                onValue(ref(db, 'vacations/'), (snapshot) => {
+                    allActivities = snapshot.val() || {};
+                    renderCalendar();
+                    if(selectedDateKey) renderTimeline(selectedDateKey);
+                });
+            }
+        } catch (error) {
+            console.error("Erreur Firebase, basculement en mode démo local:", error);
+            isFirebaseConnected = false;
+        }
+
+        // Premier lancement
+        renderCalendar();
+    </script>
+</body>
+</html>
