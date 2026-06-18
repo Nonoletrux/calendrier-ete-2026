@@ -143,8 +143,16 @@
                     <input type="text" id="title" placeholder="Ex: Restaurant, Plage..." required>
                 </div>
                 <div class="form-group">
-                    <label>Qui ? (Prénom)</label>
-                    <input type="text" id="owner" placeholder="Ton prénom" required>
+                    <label>Qui ?</label>
+                    <select id="owner" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; background: white;">
+                        <option value="" disabled selected>Choisis ton prénom</option>
+                        <option value="Noham">Noham</option>
+                        <option value="Maman">Maman</option>
+                        <option value="Calie">Calie</option>
+                        <option value="Papa">Papa</option>
+                        <option value="Invité">Invité</option>
+                    </select>
+                </div>
                 </div>
                 <div class="form-group">
                     <label>Heure Début</label>
@@ -261,7 +269,24 @@
                     if (name === "noham") {
                         blockColor = "#4cbd94"; // Vert pour Noham
                         borderColor = "#2a9d8f";
-                    } else if (name === "maman" || name === "valérie") { // Remplace par son vrai prénom si tu veux !
+                    } else if (name === "maman") { 
+                        blockColor = "#e91e63"; // Rose pour Maman
+                        borderColor = "#ad1457";
+                    } else if (name === "calie") { 
+                        blockColor = "#9b5de5"; // Violet pour Calie
+                        borderColor = "#560bad";
+                    } else if (name === "papa") { 
+                        blockColor = "#3250a8"; // Bleu pour Papa
+                        borderColor = "#02227d";
+                    } else {
+                        blockColor = "#f6ad55"; // Orange pour les invités
+                        borderColor = "#dd6b20";
+                    }
+
+                    if (name === "noham") {
+                        blockColor = "#4cbd94"; // Vert pour Noham
+                        borderColor = "#2a9d8f";
+                    } else if (name === "Alexandra" || name === "Julien" || name === "Noham" || name === "Calie") { // Remplace par son vrai prénom si tu veux !
                         blockColor = "#e91e63"; // Rose/Rouge pour Maman
                         borderColor = "#ad1457";
                     } else {
@@ -315,7 +340,7 @@
                 document.getElementById('modalTitle').innerText = "Modifier l'activité";
                 document.getElementById('editId').value = id;
                 document.getElementById('title').value = data.title;
-                document.getElementById('owner').value = data.owner;
+                document.getElementById('owner').value = data.owner; // Il va automatiquement sélectionner le bon prénom dans la liste !
                 document.getElementById('start').value = data.start;
                 document.getElementById('end').value = data.end;
                 document.getElementById('deleteBtn').style.display = 'block';
